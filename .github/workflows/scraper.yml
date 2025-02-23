@@ -1,0 +1,50 @@
+name: Run Web Scraper
+
+on:
+  schedule:
+    - cron: "15 12 * * *"  # Runs every day at 12:15 PM UTC (5:15 PM PKT)
+  workflow_dispatch:  # Allows manual runs
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false  # Using PAT for authentication
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run web scraping script
+        run: python webscraping.py
+
+      - name: Commit and push changes
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}  # Personal Access Token
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+
+          # Ensure the latest version of the main branch
+          git fetch origin main
+          git checkout main
+          git pull origin main  # Avoid rebase issue by using pull only
+          
+          # Check if movies.json has changes
+          if [[ -z $(git status --porcelain movies.json) ]]; then
+            echo "No changes in movies.json, skipping commit."
+            exit 0
+          fi
+
+          git add movies.json
+          git commit -m "🔄 Auto-update movies.json from scraper"
+          
+          # Push changes using PAT
+          git push https://x-access-token:${PAT_TOKEN}@github.com/${{ github.repository }}.git main
