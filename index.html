@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- All previous meta tags and title remain same -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Posts</title>
+    <style>
+        /* All previous CSS remains unchanged */
+        body { background-color: #000; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        .movie-post { background: #111; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(255,255,255,0.1); margin-bottom: 20px; }
+        img { max-width: 100%; border-radius: 8px; }
+        h2 { margin: 10px 0; color: #00e5ff; }
+        a { color: #1e90ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .social-bar { position: fixed; top: 0; left: 0; width: 100%; background: #333; color: #fff; padding: 10px 0; text-align: center; z-index: 1000; }
+        .pagination { text-align: center; margin-top: 30px; }
+        .pagination a { color: #00e5ff; margin: 0 5px; text-decoration: none; padding: 8px; border-radius: 4px; }
+        .pagination a:hover { background-color: #444; }
+        .search-box { text-align: center; margin-bottom: 20px; }
+        .search-box input { padding: 10px; width: 80%; border-radius: 5px; border: none; }
+        .ad-container { margin: 20px 0; padding: 15px; background: #222; border-radius: 8px; text-align: center; }
+        .iframe-ad { text-align: center; margin-top: 20px; }
+        iframe { width: 100%; height: 400px; border-radius: 8px; border: none; }
+    </style>
+</head>
+<body>
+    <!-- All ads remain in same positions -->
+    <div class="social-bar">
+        <script type='text/javascript' src='//pl25886336.effectiveratecpm.com/91/47/cb/9147cb34298a629d969ced320c64d99c.js'></script>
+    </div>
+
+    <div class="ad-container">
+        <a href="https://www.effectiveratecpm.com/adxz3bmi7b?key=bee3abdca111440f5caa447b503ddb4f" target="_blank">
+            <img src="https://via.placeholder.com/728x90?text=Top+Banner+Ad" alt="Top Ad">
+        </a>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Search for a movie..." onkeyup="searchMovies()">
+    </div>
+
+    <div id="movies-container"></div>
+
+    <div class="pagination" id="pagination"></div>
+
+    <div class="ad-container">
+        <script type="text/javascript">
+            atOptions = {
+                'key' : 'f8362415c3a6d57d4572eac21670e212',
+                'format' : 'iframe',
+                'height' : 60,
+                'width' : 468,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/f8362415c3a6d57d4572eac21670e212/invoke.js"></script>
+    </div>
+
+    <div class="iframe-ad">
+        <script type='text/javascript' src='//pl25886322.effectiveratecpm.com/ca/b4/48/cab4487e8e24639c9140c5265ec7aa6f.js'></script>
+    </div>
+
+    <div class="ad-container">
+        <script async="async" data-cfasync="false" src="//pl25886350.effectiveratecpm.com/e7e81c698248218db3ace1077f7eb108/invoke.js"></script>
+        <div id="container-e7e81c698248218db3ace1077f7eb108"></div>
+    </div>
+
+    <script>
+        let movies = [];
+        let currentPage = 1;
+        const moviesPerPage = 5;
+
+        async function fetchMovies() {
+            try {
+                // Fetch both JSON files simultaneously
+                const [newMoviesResponse, oldMoviesResponse] = await Promise.all([
+                    fetch('movies.json'),
+                    fetch('oldmovies.json')
+                ]);
+                
+                // Parse both JSON responses
+                const newMovies = await newMoviesResponse.json();
+                const oldMovies = await oldMoviesResponse.json();
+                
+                // Combine both movie lists
+                movies = [...newMovies, ...oldMovies];
+                displayMovies();
+            } catch (error) {
+                console.error('Error loading movies:', error);
+            }
+        }
+
+        // Rest of the functions remain exactly the same
+        function displayMovies() {
+            const container = document.getElementById('movies-container');
+            const pagination = document.getElementById('pagination');
+            container.innerHTML = '';
+            pagination.innerHTML = '';
+
+            let filteredMovies = movies.filter(movie => 
+                movie.title.toLowerCase().includes(document.getElementById('search').value.toLowerCase())
+            );
+            
+            let totalPages = Math.ceil(filteredMovies.length / moviesPerPage);
+            let start = (currentPage - 1) * moviesPerPage;
+            let end = start + moviesPerPage;
+            let paginatedMovies = filteredMovies.slice(start, end);
+
+            paginatedMovies.forEach(movie => {
+                let post = `<div class="movie-post">
+                    <h2>🎬 ${movie.title}</h2>`;
+
+                if (movie.streaming_embed && movie.streaming_embed !== "No link found") {
+                    post += `<h3>🎥 Watch Online:</h3>
+                        <iframe src="${movie.streaming_embed}" allowfullscreen></iframe>`;
+                }
+
+                post += `<p>📅 Download Links:</p>`;
+                for (let server in movie.download_links) {
+                    post += `<h3>// ${server} ---------------------------------------</h3>`;
+                    for (let quality in movie.download_links[server]) {
+                        post += `<p>${quality} Quality Links ${server}</p>`;
+                        movie.download_links[server][quality].forEach((link, index) => {
+                            post += `<p>
+                                <a href="${link}" target="_blank">Download (Link ${index + 1} - ${server} ${quality})</a>
+                            </p>`;
+                        });
+                    }
+                }
+
+                if (movie.poster_url) post += `<img src="${movie.poster_url}" alt="Poster">`;
+
+                post += `</div>`;
+                container.innerHTML += post;
+            });
+
+            if (totalPages > 1) {
+                if (currentPage > 1) {
+                    pagination.innerHTML += `<a href="#" onclick="changePage(1)">&laquo; First</a>`;
+                    pagination.innerHTML += `<a href="#" onclick="changePage(${currentPage - 1})">Previous</a>`;
+                }
+                
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, currentPage + 2);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    pagination.innerHTML += currentPage === i 
+                        ? `<span>${i}</span>` 
+                        : `<a href="#" onclick="changePage(${i})">${i}</a>`;
+                }
+
+                if (currentPage < totalPages) {
+                    pagination.innerHTML += `<a href="#" onclick="changePage(${currentPage + 1})">Next</a>`;
+                    pagination.innerHTML += `<a href="#" onclick="changePage(${totalPages})">Last »</a>`;
+                }
+            }
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            displayMovies();
+            window.scrollTo(0, 0);
+        }
+
+        function searchMovies() {
+            currentPage = 1;
+            displayMovies();
+        }
+
+        fetchMovies();
+    </script>
+</body>
+</html>
