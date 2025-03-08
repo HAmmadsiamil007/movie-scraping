@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- All previous meta tags and title remain same -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Posts</title>
     <style>
-        /* All previous CSS remains unchanged */
         body { background-color: #000; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
         .movie-post { background: #111; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(255,255,255,0.1); margin-bottom: 20px; }
         img { max-width: 100%; border-radius: 8px; }
@@ -25,7 +23,6 @@
     </style>
 </head>
 <body>
-    <!-- All ads remain in same positions -->
     <div class="social-bar">
         <script type='text/javascript' src='//pl25886336.effectiveratecpm.com/91/47/cb/9147cb34298a629d969ced320c64d99c.js'></script>
     </div>
@@ -73,17 +70,18 @@
 
         async function fetchMovies() {
             try {
-                // Fetch both JSON files simultaneously
                 const [newMoviesResponse, oldMoviesResponse] = await Promise.all([
                     fetch('movies.json'),
                     fetch('oldmovies.json')
                 ]);
                 
-                // Parse both JSON responses
-                const newMovies = await newMoviesResponse.json();
+                let newMovies = await newMoviesResponse.json();
                 const oldMovies = await oldMoviesResponse.json();
                 
-                // Combine both movie lists
+                // Reverse new movies array to show latest first
+                newMovies = newMovies.reverse();
+                
+                // Combine with old movies
                 movies = [...newMovies, ...oldMovies];
                 displayMovies();
             } catch (error) {
@@ -91,21 +89,21 @@
             }
         }
 
-        // Rest of the functions remain exactly the same
         function displayMovies() {
             const container = document.getElementById('movies-container');
             const pagination = document.getElementById('pagination');
             container.innerHTML = '';
             pagination.innerHTML = '';
 
+            const searchQuery = document.getElementById('search').value.toLowerCase();
             let filteredMovies = movies.filter(movie => 
-                movie.title.toLowerCase().includes(document.getElementById('search').value.toLowerCase())
+                movie.title.toLowerCase().includes(searchQuery)
             );
             
-            let totalPages = Math.ceil(filteredMovies.length / moviesPerPage);
-            let start = (currentPage - 1) * moviesPerPage;
-            let end = start + moviesPerPage;
-            let paginatedMovies = filteredMovies.slice(start, end);
+            const totalPages = Math.ceil(filteredMovies.length / moviesPerPage);
+            const start = (currentPage - 1) * moviesPerPage;
+            const end = start + moviesPerPage;
+            const paginatedMovies = filteredMovies.slice(start, end);
 
             paginatedMovies.forEach(movie => {
                 let post = `<div class="movie-post">
@@ -117,9 +115,9 @@
                 }
 
                 post += `<p>📅 Download Links:</p>`;
-                for (let server in movie.download_links) {
+                for (const server in movie.download_links) {
                     post += `<h3>// ${server} ---------------------------------------</h3>`;
-                    for (let quality in movie.download_links[server]) {
+                    for (const quality in movie.download_links[server]) {
                         post += `<p>${quality} Quality Links ${server}</p>`;
                         movie.download_links[server][quality].forEach((link, index) => {
                             post += `<p>
@@ -129,7 +127,9 @@
                     }
                 }
 
-                if (movie.poster_url) post += `<img src="${movie.poster_url}" alt="Poster">`;
+                if (movie.poster_url) {
+                    post += `<img src="${movie.poster_url}" alt="Poster">`;
+                }
 
                 post += `</div>`;
                 container.innerHTML += post;
@@ -141,8 +141,8 @@
                     pagination.innerHTML += `<a href="#" onclick="changePage(${currentPage - 1})">Previous</a>`;
                 }
                 
-                let startPage = Math.max(1, currentPage - 2);
-                let endPage = Math.min(totalPages, currentPage + 2);
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, currentPage + 2);
                 
                 for (let i = startPage; i <= endPage; i++) {
                     pagination.innerHTML += currentPage === i 
@@ -168,6 +168,7 @@
             displayMovies();
         }
 
+        // Initial load
         fetchMovies();
     </script>
 </body>
